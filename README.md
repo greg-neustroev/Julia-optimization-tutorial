@@ -21,6 +21,10 @@ cd <project-directory>
 julia
 ```
 
+> **Note**:
+> `julia` must be part of your environment variables to call it from the
+> command line. Add `julia` to `PATH` if this does not work.
+
 To quit REPL, use:
 
 
@@ -44,3 +48,30 @@ In the package mode, run the following commands:
 pkg> activate .   # activates a new environment 
 pkg> instantiate  # install missing packages and create the manifest
 ```
+
+## Little Tricks
+
+Julia supports Unicode characters. For example, these are valid commands in Julia:
+
+```julia
+julia> π
+π = 3.1415926535897...
+
+julia> 2 ∈ [1, 2]
+true
+
+julia> sin(2π / 3) == √3 / 2
+false
+
+julia> sin(2π / 3) ≈ √3 / 2
+true
+```
+
+In Julia REPL or in VSCode with Julia extension, you can use LaTeX commands for basic Unicode characters, such as `\pi` and `\in` to insert the Unicode characters. Note that you need to press <kbd>Tab</kbd> after you finished typing the command to convert it to the Unicode character.
+
+> **Note**:
+> `\euler` produces ℯ which is a special character for Euler's constant:
+> ```julia
+> julia> ℯ
+> ℯ = 2.7182818284590...
+> ```
