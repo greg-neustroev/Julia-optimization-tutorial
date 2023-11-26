@@ -15,20 +15,18 @@ chess_model = Model(HiGHS.Optimizer)
 
 # Row constraints
 # rows in Greek is γραμμές
-@constraint(chess_model, γ[r in 1:N], sum(x[r, :]) ≤ 1)
+@constraint(chess_model, γ[r ∈ 1:N], sum(x[r, :]) ≤ 1)
 
 # Column constraints
 # columns in Greek is στήλες
-@constraint(chess_model, σ[c in 1:N], sum(x[:, c]) ≤ 1)
+@constraint(chess_model, σ[c ∈ 1:N], sum(x[:, c]) ≤ 1)
 
 # Diagonal constraints
 # diagonals in Greek is διαγώνιες
-
 diagonals = -(N - 1):(N-1)
-for d ∈ diagonals
-    @constraint(chess_model, sum(LinearAlgebra.diag(x, d)) ≤ 1)
-    @constraint(chess_model, sum(LinearAlgebra.diag(reverse(x; dims=1), d)) ≤ 1)
-end
+@constraint(chess_model, δ[d ∈ diagonals], sum(LinearAlgebra.diag(x, d)) ≤ 1)
+reversed_x = reverse(x; dims=1)
+@constraint(chess_model, Δ[d ∈ diagonals], sum(LinearAlgebra.diag(reversed_x, d)) ≤ 1)
 
 print(chess_model)
 
