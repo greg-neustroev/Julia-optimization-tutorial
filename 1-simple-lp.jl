@@ -1,6 +1,5 @@
 using JuMP
 using HiGHS
-using Printf
 
 model = Model(HiGHS.Optimizer)
 
@@ -11,12 +10,16 @@ model = Model(HiGHS.Optimizer)
 
 @constraint(model, λ, 3x + y ≤ 101)
 
-print(model)
+println(model)
 
 optimize!(model)
 
-@printf("The optimal objective is %.0f\n", objective_value(model))
+println("The optimal objective is:")
+println(objective_value(model))
 
-@printf("The primal values are x = %.1f and y = %.1f\n", value(x), value(y))
+println("The solution is:")
+solution = value.((x, y))
+println(solution)
 
-@printf("The dual value is λ = %.3f\n", dual(λ))
+println("The dual value is:")
+println(dual(λ))
