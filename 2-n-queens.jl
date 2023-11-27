@@ -4,15 +4,15 @@ using LinearAlgebra
 using Pkg
 
 @time begin
-    N = 100
+    N = 8
     chess_model = Model(HiGHS.Optimizer)
 
     @variable(chess_model, x[1:N, 1:N], Bin)
 
-    @objective(chess_model, Max, sum(x[:, :]))
+    @objective(chess_model, Max, sum(x))
 
     # Number of queens
-    @constraint(chess_model, sum(x[:, :]) == N)
+    @constraint(chess_model, sum(x) == N)
 
     # Row constraints
     @constraint(chess_model, [r ∈ 1:N], sum(x[r, :]) == 1)
