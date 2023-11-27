@@ -1,14 +1,14 @@
 from pyomo.environ import *
-import highspy
 import numpy as np
 import time
 
 t = time.time()
 
-N = 100
+N = 8
 model = AbstractModel()
 model.rows = RangeSet(N)
 model.cols = Set(initialize=model.rows)
+model.diags = RangeSet(2-N, N-2)
 
 model.x = Var(model.rows, model.cols, within=Binary)
 
@@ -25,20 +25,12 @@ def rule_cols(model, c):
     return sum(model.x[r, c] for r in model.rows) == 1
 
 
-def rule_diag(model, r, c):
-    return sum(model.x[i, j]
-               for i in model.rows
-               for j in model.cols
-               if (i-r) == (j-c) and i != r and j != c
-               ) + model.x[r, c] <= 1
+def rule_diag(model, d):
+    return sum(model.x[i, i+d] for i in model.rows if 0 < i+d <= N) <= 1
 
 
-def rule_diag2(model, r, c):
-    return sum(model.x[i, j]
-               for i in model.rows
-               for j in model.cols
-               if (i-r) == (c-j) and i != r and j != c
-               ) + model.x[r, c] <= 1
+def rule_diag2(model, d):
+    return sum(model.x[N-i+1, i+d] for i in model.rows if 0 < i+d <= N) <= 1
 
 
 def rule_objective(model):
@@ -48,8 +40,8 @@ def rule_objective(model):
 model.C0 = Constraint(rule=rule_total)
 model.C1 = Constraint(model.rows, rule=rule_rows)
 model.C2 = Constraint(model.cols, rule=rule_cols)
-model.C3 = Constraint(model.rows, model.cols, rule=rule_diag)
-model.C4 = Constraint(model.rows, model.cols, rule=rule_diag2)
+model.C3 = Constraint(model.diags, rule=rule_diag)
+model.C4 = Constraint(model.diags, rule=rule_diag2)
 model.obj = Objective(rule=rule_objective, sense=maximize)
 instance = model.create_instance()
 slvr = 'appsi_highs'
