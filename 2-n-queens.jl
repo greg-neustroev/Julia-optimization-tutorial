@@ -1,36 +1,37 @@
 using JuMP
 using HiGHS
 using LinearAlgebra
+using Pkg
 
-N = 8
-chess_model = Model(HiGHS.Optimizer)
+@time begin
+    N = 100
+    chess_model = Model(HiGHS.Optimizer)
 
-@variable(chess_model, x[1:N, 1:N], Bin)
+    @variable(chess_model, x[1:N, 1:N], Bin)
 
-@objective(chess_model, Max, sum(x[:, :]))
+    @objective(chess_model, Max, sum(x[:, :]))
 
-# Number of queens
-# number in Greek is αριθμός
-@constraint(chess_model, α, sum(x[:, :]) == N)
+    # Number of queens
+    @constraint(chess_model, sum(x[:, :]) == N)
 
-# Row constraints
-# rows in Greek is γραμμές
-@constraint(chess_model, γ[r ∈ 1:N], sum(x[r, :]) ≤ 1)
+    # Row constraints
+    @constraint(chess_model, [r ∈ 1:N], sum(x[r, :]) == 1)
 
-# Column constraints
-# columns in Greek is στήλες
-@constraint(chess_model, σ[c ∈ 1:N], sum(x[:, c]) ≤ 1)
+    # Column constraints
+    @constraint(chess_model, [c ∈ 1:N], sum(x[:, c]) == 1)
 
-# Diagonal constraints
-# diagonals in Greek is διαγώνιες
-diagonals = -(N - 1):(N-1)
-@constraint(chess_model, δ[d ∈ diagonals], sum(LinearAlgebra.diag(x, d)) ≤ 1)
-reversed_x = reverse(x; dims=1)
-@constraint(chess_model, Δ[d ∈ diagonals], sum(LinearAlgebra.diag(reversed_x, d)) ≤ 1)
+    # Diagonal constraints
+    diagonals = (2-N):(N-2)
+    # LinearAlgebra.diag(x, d) return the d-th diagonal of a matrix x
+    # where 0-th diagonal is the main diagonal, positive d are the upper
+    # subdiagonals, and negative d are the lower subdiagonals
+    @constraint(chess_model, [d ∈ diagonals], sum(LinearAlgebra.diag(x, d)) ≤ 1)
+    reversed_x = reverse(x; dims=2)
+    @constraint(chess_model, [d ∈ diagonals], sum(LinearAlgebra.diag(reversed_x, d)) ≤ 1)
 
-print(chess_model)
-
-optimize!(chess_model)
+    # print(chess_model)
+    optimize!(chess_model)
+end
 
 if termination_status(chess_model) == OPTIMAL
     solution = round.(Int, value.(x))
